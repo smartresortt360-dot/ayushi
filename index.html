@@ -14,6 +14,7 @@
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 
   <style>
     /* ============================================================
@@ -2590,7 +2591,10 @@
       email: "malviyaayushi87@gmail.com",
       github: "https://github.com/malviyaayushi287-del",
       linkedin: "https://www.linkedin.com/in/ayushi-malviya-728743332",
-      profileImage: "YOUR_PROFILE_IMAGE"
+      profileImage: "YOUR_PROFILE_IMAGE",
+      emailJsServiceId: "service_a98cp3h",
+      emailJsTemplateId: "template_jil5fue",
+      emailJsPublicKey: "5GkftVRg4MwLdj0CO"
     };
 
     // ============================================================
@@ -2598,6 +2602,10 @@
     // ============================================================
     if (typeof lucide !== 'undefined') {
       lucide.createIcons();
+    }
+
+    if (typeof emailjs !== 'undefined') {
+      emailjs.init({ publicKey: CONFIG.emailJsPublicKey });
     }
 
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -2709,7 +2717,7 @@
     const formMessage = document.getElementById('formMessage');
 
     if (contactForm) {
-      contactForm.addEventListener('submit', (e) => {
+      contactForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 
         const name = document.getElementById('name').value.trim();
@@ -2735,16 +2743,38 @@
           return;
         }
 
-        // Success — no fake email sending
-        formMessage.textContent = 'Thanks! The form is ready to connect with an email service.';
-        formMessage.classList.add('success');
+        const submitButton = contactForm.querySelector('button[type="submit"]');
+        const originalButtonContent = submitButton.innerHTML;
+        submitButton.disabled = true;
+        submitButton.textContent = 'SENDING...';
+        formMessage.textContent = 'Sending your message...';
 
-        // Reset form after a delay
-        setTimeout(() => {
+        try {
+          if (typeof emailjs === 'undefined') {
+            throw new Error('Email service is unavailable');
+          }
+
+          await emailjs.send(CONFIG.emailJsServiceId, CONFIG.emailJsTemplateId, {
+            name,
+            email,
+            from_name: name,
+            from_email: email,
+            reply_to: email,
+            message,
+            to_email: CONFIG.email
+          });
+
+          formMessage.textContent = 'Thanks! Your message has been sent.';
+          formMessage.classList.add('success');
           contactForm.reset();
-          formMessage.textContent = '';
-          formMessage.className = 'form-message';
-        }, 4000);
+        } catch (error) {
+          console.error('EmailJS send failed:', error);
+          formMessage.textContent = 'Sorry, your message could not be sent. Please email ' + CONFIG.email + ' directly.';
+          formMessage.classList.add('error');
+        } finally {
+          submitButton.disabled = false;
+          submitButton.innerHTML = originalButtonContent;
+        }
       });
     }
 
