@@ -22,7 +22,7 @@ The existing EmailJS service and contact template IDs are configured in `index.h
    </div>
    ```
 
-3. Create a second template for replies. Set **To Email** to `{{to_email}}`, **From Name** to `{{owner_name}}`, **Reply To** to `{{reply_to}}`, and subject to `A reply from {{owner_name}}`. The **From Email** must be the address authorized by your EmailJS email service. Use this HTML:
+3. Create a second template for replies (currently configured in the site as `template_c8aodcx`). Set **To Email** to `{{to_email}}` exactly; do not leave your own email hardcoded there. The reply page sends `to_email` from the client's submitted email address. Set **From Name** to `{{owner_name}}`, **Reply To** to `{{reply_to}}`, and subject to `A reply from {{owner_name}}`. The **From Email** must be the address authorized by your EmailJS email service. Use this HTML:
 
    ```html
    <div style="margin:0;padding:32px 12px;background:#FFF9F7;font-family:Arial,Helvetica,sans-serif;color:#211D23">
@@ -38,7 +38,7 @@ The existing EmailJS service and contact template IDs are configured in `index.h
    </div>
    ```
 
-4. Copy the new reply template ID into `reply.html`, replacing `template_replace_with_reply_template_id` in `EMAILJS_CONFIG`.
+4. If you create a different reply template, replace `template_c8aodcx` in `reply.html` with its ID.
 5. Add your exact Vercel production domain to the EmailJS allowed origins. Keep the connected service's From address set to your authorized owner email.
 
 EmailJS escapes normal `{{variables}}` in HTML templates. Keep these double braces; do not use triple braces for user-provided values.
