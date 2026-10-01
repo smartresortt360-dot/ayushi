@@ -14,7 +14,8 @@ The existing EmailJS service and contact template IDs are configured in `index.h
      <div style="max-width:600px;margin:0 auto;padding:32px;background:#FFFFFF;border:1px solid #f3e5e8;border-radius:16px">
        <p style="margin:0;color:#77717A;font-size:12px;letter-spacing:2px">CONTENT • SOCIAL MEDIA • DIGITAL</p>
        <h1 style="margin:12px 0 24px;font-family:Georgia,serif;font-size:28px">A new note for AYUSHI</h1>
-       <p><strong>From:</strong> {{from_name}} &lt;{{from_email}}&gt;</p>
+      <p><strong>Client name:</strong> {{name}}</p>
+      <p><strong>Client email:</strong> {{email}}</p>
        <div style="margin:20px 0;padding:18px;background:#FFF4EC;border-radius:10px;line-height:1.7;white-space:pre-wrap">{{message}}</div>
        <a href="{{reply_url}}" style="display:inline-block;padding:13px 24px;background:#E8A6BE;border-radius:8px;color:#211D23;text-decoration:none;font-weight:bold">REPLY</a>
      </div>
