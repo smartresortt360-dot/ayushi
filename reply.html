@@ -56,8 +56,21 @@
       </form>
     </section>
   </main>
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <script>
-    const token = new URLSearchParams(window.location.search).get('token') || '';
+    const EMAILJS_CONFIG = {
+      serviceId: 'service_a98cp3h',
+      replyTemplateId: 'template_replace_with_reply_template_id',
+      publicKey: '5GkftVRg4MwLdj0CO',
+      ownerName: 'Ayushi Malviya',
+      ownerEmail: 'malviyaayushi87@gmail.com'
+    };
+    const params = new URLSearchParams(window.location.search);
+    const inquiry = {
+      name: params.get('name') || '',
+      email: params.get('email') || '',
+      message: params.get('message') || ''
+    };
     const form = document.getElementById('replyForm');
     const status = document.getElementById('loading');
     const message = document.getElementById('status');
@@ -67,23 +80,16 @@
       status.setAttribute('role', 'alert');
     }
 
-    async function loadInquiry() {
-      if (!/^[a-f0-9]{64}$/.test(token)) {
-        showError('This reply link is invalid or has expired.');
+    function loadInquiry() {
+      if (!inquiry.name || inquiry.name.length > 120 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(inquiry.email) || inquiry.message.length > 1800) {
+        showError('This reply link is incomplete or invalid.');
         return;
       }
-      try {
-        const response = await fetch(`api/reply-context.php?token=${encodeURIComponent(token)}`, { cache: 'no-store' });
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.error || 'Could not load this inquiry.');
-        document.getElementById('clientName').value = data.name;
-        document.getElementById('clientEmail').value = data.email;
-        document.getElementById('originalMessage').value = data.message;
-        status.hidden = true;
-        form.hidden = false;
-      } catch (error) {
-        showError(error.message);
-      }
+      document.getElementById('clientName').value = inquiry.name;
+      document.getElementById('clientEmail').value = inquiry.email;
+      document.getElementById('originalMessage').value = inquiry.message;
+      status.hidden = true;
+      form.hidden = false;
     }
 
     form.addEventListener('submit', async (event) => {
@@ -95,23 +101,30 @@
         message.textContent = 'Write a reply before sending.';
         return;
       }
+      if (typeof emailjs === 'undefined') {
+        message.className = 'error';
+        message.textContent = 'Email service is unavailable. Please try again later.';
+        return;
+      }
       const button = document.getElementById('sendButton');
       button.disabled = true;
       button.textContent = 'SENDING…';
       try {
-        const response = await fetch('api/send-reply.php', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ token, reply: document.getElementById('reply').value })
-        });
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.error || 'Could not send reply.');
+        await emailjs.send(EMAILJS_CONFIG.serviceId, EMAILJS_CONFIG.replyTemplateId, {
+          to_email: document.getElementById('clientEmail').value.trim(),
+          client_name: document.getElementById('clientName').value.trim(),
+          owner_name: EMAILJS_CONFIG.ownerName,
+          reply_to: EMAILJS_CONFIG.ownerEmail,
+          reply: document.getElementById('reply').value.trim(),
+          original_message: document.getElementById('originalMessage').value
+        }, { publicKey: EMAILJS_CONFIG.publicKey });
         document.getElementById('reply').value = '';
         message.className = 'success';
         message.textContent = 'Your reply has been sent.';
       } catch (error) {
+        console.error('EmailJS reply send failed:', error);
         message.className = 'error';
-        message.textContent = error.message;
+        message.textContent = 'Your reply could not be sent. Check the EmailJS reply template setup and try again.';
       } finally {
         button.disabled = false;
         button.textContent = 'SEND REPLY';

@@ -14,6 +14,7 @@
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 
   <style>
     /* ============================================================
@@ -2542,7 +2543,7 @@
               </div>
               <div class="form-group">
                 <label for="message">Message</label>
-                <textarea id="message" name="message" placeholder="Tell me about the opportunity..." required></textarea>
+                <textarea id="message" name="message" maxlength="1800" placeholder="Tell me about the opportunity..." required></textarea>
               </div>
               <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">
                 SEND MESSAGE <span class="arrow">→</span>
@@ -2606,6 +2607,9 @@
       name: "Ayushi Malviya",
       role: "Content • Social Media • Digital",
       email: "malviyaayushi87@gmail.com",
+      emailJsServiceId: "service_a98cp3h",
+      emailJsContactTemplateId: "template_jil5fue",
+      emailJsPublicKey: "5GkftVRg4MwLdj0CO",
       github: "https://github.com/malviyaayushi287-del",
       linkedin: "https://www.linkedin.com/in/ayushi-malviya-728743332",
       profileImage: "YOUR_PROFILE_IMAGE",
@@ -2760,18 +2764,28 @@
         formMessage.textContent = 'Sending your message...';
 
         try {
-          const response = await fetch('api/contact.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              name,
-              email,
-              message,
-              website: document.getElementById('website').value
-            })
-          });
-          const result = await response.json();
-          if (!response.ok) throw new Error(result.error || 'Message could not be sent');
+          if (document.getElementById('website').value) {
+            formMessage.textContent = 'Thanks! Your message has been sent.';
+            formMessage.classList.add('success');
+            contactForm.reset();
+            return;
+          }
+          if (typeof emailjs === 'undefined') throw new Error('Email service is unavailable');
+
+          const replyUrl = new URL('/reply.html', window.location.origin);
+          replyUrl.searchParams.set('name', name);
+          replyUrl.searchParams.set('email', email);
+          replyUrl.searchParams.set('message', message);
+
+          await emailjs.send(CONFIG.emailJsServiceId, CONFIG.emailJsContactTemplateId, {
+            to_email: CONFIG.email,
+            owner_name: CONFIG.name,
+            from_name: name,
+            from_email: email,
+            reply_to: email,
+            message,
+            reply_url: replyUrl.toString()
+          }, { publicKey: CONFIG.emailJsPublicKey });
 
           formMessage.textContent = 'Thanks! Your message has been sent.';
           formMessage.classList.add('success');
