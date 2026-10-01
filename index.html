@@ -2780,11 +2780,14 @@
           await emailjs.send(CONFIG.emailJsServiceId, CONFIG.emailJsContactTemplateId, {
             to_email: CONFIG.email,
             owner_name: CONFIG.name,
+            name,
+            email,
             from_name: name,
             from_email: email,
             reply_to: email,
             message,
-            reply_url: replyUrl.toString()
+            reply_url: replyUrl.toString(),
+            reply_link: replyUrl.toString()
           }, { publicKey: CONFIG.emailJsPublicKey });
 
           formMessage.textContent = 'Thanks! Your message has been sent.';

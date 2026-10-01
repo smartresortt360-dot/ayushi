@@ -60,7 +60,7 @@
   <script>
     const EMAILJS_CONFIG = {
       serviceId: 'service_a98cp3h',
-      replyTemplateId: 'template_replace_with_reply_template_id',
+      replyTemplateId: 'template_c8aodcx',
       publicKey: '5GkftVRg4MwLdj0CO',
       ownerName: 'Ayushi Malviya',
       ownerEmail: 'malviyaayushi87@gmail.com'
@@ -111,12 +111,12 @@
       button.textContent = 'SENDING…';
       try {
         await emailjs.send(EMAILJS_CONFIG.serviceId, EMAILJS_CONFIG.replyTemplateId, {
-          to_email: document.getElementById('clientEmail').value.trim(),
-          client_name: document.getElementById('clientName').value.trim(),
+          to_email: inquiry.email,
+          client_name: inquiry.name,
           owner_name: EMAILJS_CONFIG.ownerName,
           reply_to: EMAILJS_CONFIG.ownerEmail,
           reply: document.getElementById('reply').value.trim(),
-          original_message: document.getElementById('originalMessage').value
+          original_message: inquiry.message
         }, { publicKey: EMAILJS_CONFIG.publicKey });
         document.getElementById('reply').value = '';
         message.className = 'success';
